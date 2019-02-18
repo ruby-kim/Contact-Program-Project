@@ -1,0 +1,132 @@
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+
+struct student
+{
+	char name[21];
+	char call[16];
+	char birth[9];
+}; //문제 조건에 맞는 구조체 선언
+
+void insert(struct student *p, int *n); //1. Registration
+void print_all(struct student *p, int n); //2. ShowAll
+void delete_tel(struct student *p, int *n); //3. Delete
+void find_by_birth(struct student *p, int n); //4. FindBirth
+
+int main()
+{
+	int n = 0, input;//총 인원 n, 입력숫자 input
+	struct student tel[100], *p = tel;
+	while (1)
+	{
+		//문제 조건에 맞는 메뉴가 계속 출력되게끔 while문 안에 작성하였습니다.
+		printf("*****Menu*****\n");
+		printf("<1.Registration><2.ShowAll><3.Delete><4.FindByBirth><5.Exit>\n");
+		printf("Enter_the_menu_number:");
+
+		scanf("%d", &input); //input에 값을 입력받아 1,2,3,4,5를 수행하는데
+		switch (input)
+		{
+		case 1:
+			if (n > 99) printf("OVERFLOW\n"); //만약 n이 100이상이면 구조체 범위를 초과하기 때문에 overflow를 출력하도록,
+			else insert(p, &n); //아니면 insert함수를 수행하도록 만들었습니다.
+			break;
+		case 2:
+			print_all(p, n); //print_all함수를 수행하도록 만들었습니다.
+			break;
+		case 3:
+			if (n == 0) printf("NO MEMBER\n"); //n=0, 즉 아무것도 입력되지 않았을 때 no member를 출력하도록,
+			else delete_tel(p, &n); //아니면 delete를 하도록 만들었습니다.
+			break;
+		case 4:
+			find_by_birth(p, n); //find_by_birth함수를 수행하도록 만들었습니다.
+			break;
+		case 5:
+			return 0;
+		}
+	}
+	return 0;
+}
+
+void insert(struct student *p, int *n) //1을 눌렀을 때
+{
+	char ar[20] = "";	//사용할 문자열배열 선언,
+	int i, j; //for문에 사용하기 위한 i,j 선언
+	struct student tmp; //이름을 사전순으로 정렬할 때 swap하기 위한 mp 선언
+
+	printf("Name:"); //이름 입력
+	scanf("%s", ar); //ar에 이름을 저장해
+	strcpy(p[*n].name, ar); //구조체에 넣었습니다.
+
+	printf("Phone_number:"); //번호 입력
+	scanf("%s", ar); //ar에 번호를 저장해
+	strcpy(p[*n].call, ar); //구조체에 넣었습니다.
+
+	printf("Birth:"); //생일 입력
+	scanf("%s", ar); //ar에 생일을 저장해
+	strcpy(p[*n].birth, ar); //구조체에 넣었습니다.
+	(*n)++; //인원이 추가되었기 때문에 전체 인원을 뜻하는 *n에 +1을 해주었습니다.
+
+	for (i = 0; i < *n; i++) //이후 2중for문을 이용해
+	{
+		for (j = 0; j < *n - 1 - i; j++)
+		{
+			if (strcmp(p[j].name, p[j + 1].name) > 0) //앞에 있는 이름이 사전순으로 뒤에 있어야 한다면
+			{
+				tmp = p[j]; //tmp를 이용해 자리를 변경해주었습니다
+				p[j] = p[j + 1];
+				p[j + 1] = tmp;
+			}
+		}
+	}
+	printf("<<%d>>\n", *n); //마지막으로 현재 몇명이 저장되어 있는지 출력하도록 만들었습니다.
+}
+
+void print_all(struct student *p, int n)
+{
+	int i;
+	for (i = 0; i < n; i++)
+		printf("%s %s %s\n", p[i].name, p[i].call, p[i].birth); //n을 이용해 현재 저장된 인원을 출력하도록 만들었습니다.
+}
+
+void delete_tel(struct student *p, int *n)
+{
+	char ar[21] = ""; //이름을 저장할 문자열배열 ar선언
+	int i, flag = -1; //for문에 이용할 i// 똑같은 이름이 있는지 판단하기 위한, 만약 있으면 그 인덱스 값을 저장할 flag선언
+	//처음부터 p를 돌렸을 때 같은 이름이 나올 수도 있기 때문에 flag의 초기값을 -1로 설정해주었습니다.
+	printf("Name:");
+	scanf("%s", ar); //이름 입력
+
+	for (i = 0; i < *n; i++)
+	{
+		if (strcmp(p[i].name, ar) == 0) //for문을 이용해 만약 tel의 맴버의 이름이 ar과 같다면
+		{
+			flag = i; //그 인덱스 값을 flag에 저장하고
+			break; //멈추기(문제 조건에서 동명이인은 없다고 했기에 바로 break를 걸어서 더욱 빠르게 돌아가도록 만들었습니다)
+		}
+	}
+	if (flag != -1) //만약 flag가 -1이 아니라면, 즉 없애려는 이름이 있어 flag에 그 인덱스 값이 저장되면
+	{
+		for (i = flag; i < *n; i++) //뒤의 값들을 한칸씩 앞으로 당겨오기
+			p[i] = p[i + 1];
+		(*n)--; //인원이 한 명 줄었기 때문에 *n에 -1을 해주었습니다.
+	}
+}
+
+void find_by_birth(struct student *p, int n)
+{
+	int chk, in_bir; //p를 돌리면서 생일(달)을 정수로 저장할 chk, 입력받을 값 저장할 in_bir 선언
+	int i;
+	char ar[3] = ""; //p를 돌리면서 생일(달)을 문자열 형태로 저장할 ar 선언
+	printf("Birth:");
+	scanf("%d", &in_bir); //찾는 생일(달)을 입력해
+	for (i = 0; i < n; i++)
+	{
+		ar[0] = p[i].birth[4]; //ar에 생일(달)을 문자 형태로 저장
+		ar[1] = p[i].birth[5];
+		chk = atoi(ar); //atoi를 이용해 ar을 정수로 변환
+		if (in_bir == chk) //만약 chk과 in_bir이 같으면 해당 값의 이름, 전화, 생일을 출력하도록 만들었습니다.
+			printf("%s %s %s\n", p[i].name, p[i].call, p[i].birth);
+	}
+}
